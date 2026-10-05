@@ -1,5 +1,3 @@
-# app/handlers/chat_events.py
-
 import asyncio
 from aiogram import Router, Bot
 from aiogram.filters import ChatMemberUpdatedFilter, IS_NOT_MEMBER, MEMBER
