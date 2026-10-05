@@ -1,10 +1,8 @@
-# app/handlers/anti_spam.py
-
 import time
 from aiogram import Router, Bot, F
 from aiogram.types import Message, ChatPermissions
 from app import ui_text
-from app.database.db_manager import add_warn
+from app.database.db_manager import add_warn, reset_warns
 
 router = Router()
 
@@ -48,12 +46,11 @@ async def monitor_chat(message: Message, bot: Bot):
             pass
 
         warns_count = await add_warn(user_id, chat_id)
-
         mute_permissions = ChatPermissions(can_send_messages=False)
 
         try:
             if warns_count == 1:
-                until_date = int(time.time()) + 120
+                until_date = int(time.time()) + 180
                 await bot.restrict_chat_member(
                     chat_id=chat_id,
                     user_id=user_id,
@@ -68,7 +65,7 @@ async def monitor_chat(message: Message, bot: Bot):
                 )
 
             elif warns_count == 2:
-                until_date = int(time.time()) + 1800
+                until_date = int(time.time()) + 1920
                 await bot.restrict_chat_member(
                     chat_id=chat_id,
                     user_id=user_id,
@@ -82,8 +79,9 @@ async def monitor_chat(message: Message, bot: Bot):
                     parse_mode="HTML"
                 )
 
-            else:
+            elif warns_count >= 3:
                 await bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
+                await reset_warns(user_id, chat_id)
                 
                 await bot.send_message(
                     chat_id=chat_id,
